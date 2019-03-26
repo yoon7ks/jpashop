@@ -1,6 +1,7 @@
 package jpabook.jpashop.domain.item;
 
 import jpabook.jpashop.domain.Category;
+import jpabook.jpashop.exception.NotEnoughStockException;
 
 import javax.persistence.*;
 import java.util.ArrayList;
@@ -16,12 +17,28 @@ public abstract class Item {
     @Column(name = "item_id")
     private Long id;
 
-    private String name;
-    private int price;
-    private int stockQuantity;
+    private String name;        // 이름
+    private int price;          // 가격
+    private int stockQuantity;  // 재고수량
 
     @ManyToMany(mappedBy = "items")
     private List<Category> categories = new ArrayList<Category>();
+
+    public void addStock(int quantity) {
+        this.stockQuantity += quantity;
+    }
+
+    public void removeStock(int quantity) {
+        int restStock = this.stockQuantity - quantity;
+        if (restStock < 0) {
+            try {
+                throw new NotEnoughStockException("need more stock");
+            } catch (NotEnoughStockException e) {
+                e.printStackTrace();
+            }
+        }
+        this.stockQuantity = restStock;
+    }
 
     public Long getId() {
         return id;
